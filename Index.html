@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конструктор Дома</title>
+    <!-- Подключаем стили (можно в отдельном файле style.css) -->
+    <style>
+        body { font-family: sans-serif; background-color: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); padding: 20px; }
+        .card { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 8px; text-align: center; }
+        .card img { width: 100%; border-radius: 5px; }
+        .selected { border: 3px solid #34b7f1; } /* Подсветка выбора */
+        h2 { text-align: center; }
+    </style>
+    <!-- ГЛАВНОЕ: Скрипт Телеграма -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+
+    <h2>Выберите стиль дома</h2>
+
+    <!-- Пример карточек выбора -->
+    <div id="styles-container">
+		<div class="card" onclick="selectStyle('american')">
+			<img src="american.jpg" alt="Американский"> 
+			<p>Американский</p>
+		</div>
+		<div class="card" onclick="selectStyle('art-deco')">
+			<img src="art-deco.jpg" alt="Ар-Деко"> 
+			<p>Ар-Деко</p>
+		</div>
+		<div class="card" onclick="selectStyle('barnhouse')">
+			<img src="barnhouse.jpg" alt="Барнхаус"> 
+			<p>Барнхаус</p>
+		</div>
+		<div class="card" onclick="selectStyle('baroque')">
+			<img src="baroque.jpg" alt="Барокко"> 
+			<p>Барокко</p>
+		</div>
+		<div class="card" onclick="selectStyle('chalet')">
+			<img src="chalet.jpg" alt="Шале"> 
+			<p>Шале</p>
+		</div>
+		<div class="card" onclick="selectStyle('classic')">
+			<img src="classic.jpg" alt="Классический"> 
+			<p>Классический</p>
+		</div>
+		<div class="card" onclick="selectStyle('colonial')">
+			<img src="colonial.jpg" alt="Колониальный"> 
+			<p>Колониальный</p>
+		</div>
+		<div class="card" onclick="selectStyle('country')">
+			<img src="country.jpg" alt="Кантри"> 
+			<p>Кантри</p>
+		</div>
+		<div class="card" onclick="selectStyle('english')">
+			<img src="english.jpg" alt="Английский"> 
+			<p>Английский</p>
+		</div>
+		<div class="card" onclick="selectStyle('european')">
+			<img src="european.jpg" alt="Европейский"> 
+			<p>Европейский</p>
+		</div>
+		<div class="card" onclick="selectStyle('ghotic')">
+			<img src="ghotic.jpg" alt="Готический"> 
+			<p>Готический</p>
+		</div>
+		<div class="card" onclick="selectStyle('half-timbered')">
+			<img src="half-timbered.jpg" alt="Фахверк"> 
+			<p>Фахверк</p>
+		</div>
+		<div class="card" onclick="selectStyle('hi-tech')">
+			<img src="hi-tech.jpg" alt="Хай-тек"> 
+			<p>Хай-тек</p>
+		</div>
+		<div class="card" onclick="selectStyle('mediterranean')">
+			<img src="mediterranean.jpg" alt="Средиземноморский"> 
+			<p>Средиземноморский</p>
+		</div>
+		<div class="card" onclick="selectStyle('minimal')">
+			<img src="minimal.jpg" alt="Минимализм"> 
+			<p>Минимализм</p>
+		</div>
+		<div class="card" onclick="selectStyle('minimal')">
+			<img src="minimal.jpg" alt="Минимализм"> 
+			<p>Минимализм</p>
+		</div>
+		<div class="card" onclick="selectStyle('oriental')">
+			<img src="oriental.jpg" alt="Восточный"> 
+			<p>Восточный</p>
+		</div>
+		<div class="card" onclick="selectStyle('provance')">
+			<img src="provance.jpg" alt="Прованс"> 
+			<p>Прованс</p>
+		</div>
+		<div class="card" onclick="selectStyle('renaissance')">
+			<img src="renaissance.jpg" alt="Ренессанс"> 
+			<p>Ренессанс</p>
+		</div>
+		<div class="card" onclick="selectStyle('russian')">
+			<img src="russian.jpg" alt="Русский"> 
+			<p>Русский</p>
+		</div>
+		<div class="card" onclick="selectStyle('scandic')">
+			<img src="scandic.jpg" alt="Скандинавский"> 
+			<p>Скандинавский</p>
+		</div>
+    </div>
+
+    <!-- Логика приложения -->
+    <script>
+        let tg = window.Telegram.WebApp; // Инициализация
+        tg.expand(); // Раскрыть на весь экран
+
+        let selectedStyle = "";
+
+        // Настраиваем Главную Кнопку (внизу экрана)
+        tg.MainButton.textColor = '#FFFFFF';
+        tg.MainButton.color = '#2cab37';
+
+        function selectStyle(style) {
+            selectedStyle = style;
+            
+            // Визуально выделяем (логика CSS классов - упрощенно)
+            document.querySelectorAll('.card').forEach(el => el.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+
+            // Показываем кнопку "Отправить"
+            if (tg.MainButton.isVisible === false) {
+                tg.MainButton.setText("Выбрать стиль");
+                tg.MainButton.show();
+            }
+        }
+
+        // Что происходит при нажатии на Главную Кнопку
+        Telegram.WebApp.onEvent('mainButtonClicked', function(){
+            // Формируем JSON с данными
+            let data = {
+                style: selectedStyle,
+                user_id: tg.initDataUnsafe.user.id // Можно взять ID юзера
+            };
+            
+            // Отправляем данные боту
+            tg.sendData(JSON.stringify(data)); 
+        });
+    </script>
+</body>
+</html>
