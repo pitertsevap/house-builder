@@ -134,16 +134,22 @@
 
         // Что происходит при нажатии на Главную Кнопку
         Telegram.WebApp.onEvent('mainButtonClicked', function(){
+		    
+			// Строка для отладки
+			console.log("Главная кнопка нажата! Готовлю данные для отправки..."); 
+			
             // Формируем JSON с данными
             let data = {
                 style: selectedStyle,
                 user_id: tg.initDataUnsafe.user.id // Можно взять ID юзера
             };
             
+			// Еще одна строка для отладки
+			console.log("Отправляю данные:", JSON.stringify(data));
+	
             // Отправляем данные боту
             tg.sendData(JSON.stringify(data)); 
         });
     </script>
 </body>
-
 </html>
