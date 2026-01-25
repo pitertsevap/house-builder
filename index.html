@@ -130,23 +130,32 @@
 
         // Что происходит при нажатии на Главную Кнопку
         Telegram.WebApp.onEvent('mainButtonClicked', function(){
-		    
-			// Строка для отладки
-			console.log("Главная кнопка нажата! Готовлю данные для отправки..."); 
+			console.log("Главная кнопка была нажата! Готовлю данные для отправки..."); 
+    
+    	// Безопасно получаем ID пользователя
+    	let userId = null;
+    	if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        	userId = tg.initDataUnsafe.user.id;
+    	}
 			
-            // Формируем JSON с данными
-            let data = {
-                style: selectedStyle,
-                user_id: tg.initDataUnsafe.user.id // Можно взять ID юзера
-            };
-            
-			// Еще одна строка для отладки
-			console.log("Отправляю данные:", JSON.stringify(data));
-	
-            // Отправляем данные боту
-            tg.sendData(JSON.stringify(data)); 
-        });
+    	// Формируем данные
+    	let data = {
+        	style: selectedStyle,
+			user_id: userId // Используем безопасную переменную
+    	};
+
+    	console.log("Отправляю боту данные:", JSON.stringify(data));
+    
+    	// Отправляем данные, только если они не пустые
+    	if (data.style) {
+        	tg.sendData(JSON.stringify(data));
+    	} else {
+        	console.error("Ошибка: Стиль не выбран, данные не отправлены!")
+			
+		// Можно показать пользователю уведомление
+        tg.showAlert("Выберите стиль дома.");
+		}
+		});
     </script>
 </body>
 </html>
-
