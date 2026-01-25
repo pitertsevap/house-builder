@@ -4,158 +4,305 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Конструктор Дома</title>
-    <!-- Подключаем стили (можно в отдельном файле style.css) -->
-    <style>
-        body { font-family: sans-serif; background-color: var(--tg-theme-bg-color); color: var(--tg-theme-text-color); padding: 20px; }
-        .card { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 8px; text-align: center; }
-        .card img { width: 100%; border-radius: 5px; }
-        .selected { border: 3px solid #34b7f1; } /* Подсветка выбора */
-        h2 { text-align: center; }
-    </style>
     <!-- ГЛАВНОЕ: Скрипт Телеграма -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Стили -->
+    <style>
+        :root {
+            --tg-theme-bg-color: #ffffff; /* Значения по умолчанию, если переменные ТГ не загрузятся */
+            --tg-theme-text-color: #000000;
+            --tg-theme-button-color: #34b7f1;
+            --tg-theme-secondary-bg-color: #f0f0f0;
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--tg-theme-bg-color); 
+            color: var(--tg-theme-text-color); 
+            padding: 15px; 
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .step { display: none; }
+        .step.active { display: block; }
+        h2 { text-align: center; margin-bottom: 20px; font-size: 1.2em; }
+        .button-group { display: flex; flex-direction: column; gap: 10px; }
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            background-color: var(--tg-theme-secondary-bg-color);
+            color: var(--tg-theme-text-color);
+            transition: transform 0.1s ease;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn.selected { background-color: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color, #ffffff); }
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 30px; }
+        .nav-btn { width: 48%; }
+        .progress-bar-container { width: 100%; background-color: var(--tg-theme-secondary-bg-color); border-radius: 5px; overflow: hidden; margin-bottom: 20px; }
+        .progress-bar { height: 8px; width: 0%; background-color: var(--tg-theme-button-color); transition: width 0.3s ease; }
+        
+        /* Стили для карточек выбора стиля */
+        .cards-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .card { border: 2px solid transparent; padding: 10px; border-radius: 12px; text-align: center; background-color: var(--tg-theme-secondary-bg-color); }
+        .card img { width: 100%; height: 80px; object-fit: cover; border-radius: 8px; }
+        .card p { margin: 5px 0 0; font-size: 0.8em; }
+        .card.selected { border-color: var(--tg-theme-button-color); }
+
+        /* Стили для инпутов и слайдеров */
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            box-sizing: border-box;
+            border: 1px solid var(--tg-theme-secondary-bg-color);
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            border-radius: 8px;
+            font-size: 1em;
+            text-align: center;
+        }
+        input[type="range"] { width: 100%; }
+        #area-output { font-weight: bold; text-align: center; margin-top: 10px; }
+
+        /* Стили для кастомных чекбоксов */
+        .checkbox-group label {
+            display: block;
+            background-color: var(--tg-theme-secondary-bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .checkbox-group input { display: none; }
+        .checkbox-group input:checked + span { font-weight: bold; }
+        .checkbox-group input:checked + span::before { content: '✅ '; }
+    </style>
 </head>
 <body>
 
-    <h2>Выберите стиль дома</h2>
+    <div class="progress-bar-container">
+        <div id="progress-bar" class="progress-bar"></div>
+    </div>
 
-    <!-- Пример карточек выбора -->
-    <div id="styles-container">
-		<div class="card" onclick="selectStyle('american')">
-			<img src="american.jpg" alt="Американский"> 
-			<p>Американский</p>
-		</div>
-		<div class="card" onclick="selectStyle('art-deco')">
-			<img src="art-deco.jpg" alt="Ар-Деко"> 
-			<p>Ар-Деко</p>
-		</div>
-		<div class="card" onclick="selectStyle('barnhouse')">
-			<img src="barnhouse.jpg" alt="Барнхаус"> 
-			<p>Барнхаус</p>
-		</div>
-		<div class="card" onclick="selectStyle('baroque')">
-			<img src="baroque.jpg" alt="Барокко"> 
-			<p>Барокко</p>
-		</div>
-		<div class="card" onclick="selectStyle('chalet')">
-			<img src="chalet.jpg" alt="Шале"> 
-			<p>Шале</p>
-		</div>
-		<div class="card" onclick="selectStyle('classic')">
-			<img src="classic.jpg" alt="Классический"> 
-			<p>Классический</p>
-		</div>
-		<div class="card" onclick="selectStyle('colonial')">
-			<img src="colonial.jpg" alt="Колониальный"> 
-			<p>Колониальный</p>
-		</div>
-		<div class="card" onclick="selectStyle('country')">
-			<img src="country.jpg" alt="Кантри"> 
-			<p>Кантри</p>
-		</div>
-		<div class="card" onclick="selectStyle('english')">
-			<img src="english.jpg" alt="Английский"> 
-			<p>Английский</p>
-		</div>
-		<div class="card" onclick="selectStyle('european')">
-			<img src="european.jpg" alt="Европейский"> 
-			<p>Европейский</p>
-		</div>
-		<div class="card" onclick="selectStyle('ghotic')">
-			<img src="ghotic.jpg" alt="Готический"> 
-			<p>Готический</p>
-		</div>
-		<div class="card" onclick="selectStyle('half-timbered')">
-			<img src="half-timbered.jpg" alt="Фахверк"> 
-			<p>Фахверк</p>
-		</div>
-		<div class="card" onclick="selectStyle('hi-tech')">
-			<img src="hi-tech.jpg" alt="Хай-тек"> 
-			<p>Хай-тек</p>
-		</div>
-		<div class="card" onclick="selectStyle('mediterranean')">
-			<img src="mediterranean.jpg" alt="Средиземноморский"> 
-			<p>Средиземноморский</p>
-		</div>
-		<div class="card" onclick="selectStyle('minimal')">
-			<img src="minimal.jpg" alt="Минимализм"> 
-			<p>Минимализм</p>
-		</div>
-		<div class="card" onclick="selectStyle('oriental')">
-			<img src="oriental.jpg" alt="Восточный"> 
-			<p>Восточный</p>
-		</div>
-		<div class="card" onclick="selectStyle('provance')">
-			<img src="provance.jpg" alt="Прованс"> 
-			<p>Прованс</p>
-		</div>
-		<div class="card" onclick="selectStyle('renaissance')">
-			<img src="renaissance.jpg" alt="Ренессанс"> 
-			<p>Ренессанс</p>
-		</div>
-		<div class="card" onclick="selectStyle('russian')">
-			<img src="russian.jpg" alt="Русский"> 
-			<p>Русский</p>
-		</div>
-		<div class="card" onclick="selectStyle('scandic')">
-			<img src="scandic.jpg" alt="Скандинавский"> 
-			<p>Скандинавский</p>
-		</div>
+    <!-- БЛОК 0: Калибровка -->
+    <div id="step-0" class="step active">
+        <h2>Для чего строится дом?</h2>
+        <div class="button-group">
+            <button class="btn" onclick="handleChoice('purpose', 'permanent', 1)">Для постоянного проживания (ПМЖ)</button>
+            <button class="btn" onclick="handleChoice('purpose', 'seasonal', 1)">Дача / Сезонное проживание</button>
+        </div>
+    </div>
+
+    <!-- БЛОК 1: Геометрия -->
+    <div id="step-1" class="step">
+        <h2>Укажите основные параметры</h2>
+        <label>Количество жителей:</label>
+        <input type="number" id="residents-input" value="3" min="1" max="10">
+        <br><br>
+        <label>Желаемая площадь, м²:</label>
+        <input type="range" id="area-slider" min="80" max="300" value="150" step="10">
+        <div id="area-output">150 м²</div>
+        <br>
+        <label>Этажность:</label>
+        <div class="button-group" id="floors-group">
+            <button class="btn" data-value="1">1 этаж</button>
+            <button class="btn" data-value="2">2 этажа</button>
+            <button class="btn" data-value="attic">1 этаж + мансарда</button>
+        </div>
+        <div class="nav-buttons">
+            <button class="btn nav-btn" onclick="showStep(0)">Назад</button>
+            <button class="btn nav-btn" onclick="handleStep1Next()">Далее</button>
+        </div>
+    </div>
+
+    <!-- БЛОК 2: Конструктив -->
+    <div id="step-2" class="step">
+        <h2>Из чего будем строить?</h2>
+        <label>Материал стен:</label>
+        <div class="button-group" id="walls-group">
+            <button class="btn" data-value="gas_block">Газобетон / Пеноблок</button>
+            <button class="btn" data-value="brick">Кирпич / Керамический блок</button>
+            <button class="btn" data-value="frame">Каркасная технология</button>
+            <button class="btn" data-value="wood">Клееный брус / Бревно</button>
+        </div>
+        <br>
+        <label>Гараж:</label>
+        <div class="button-group" id="garage-group">
+            <button class="btn" data-value="none">Не нужен</button>
+            <button class="btn" data-value="attached">Пристроенный</button>
+            <button class="btn" data-value="integrated">Встроенный в дом</button>
+        </div>
+        <div class="nav-buttons">
+            <button class="btn nav-btn" onclick="showStep(1)">Назад</button>
+            <button class="btn nav-btn" onclick="handleStep2Next()">Далее</button>
+        </div>
+    </div>
+
+    <!-- БЛОК 3: Дополнительные помещения -->
+    <div id="step-3" class="step">
+        <h2>Какие еще помещения нужны?</h2>
+        <div class="checkbox-group">
+            <label><input type="checkbox" name="extra_rooms" value="master_bedroom"> <span>Мастер-спальня (со своим с/у)</span></label>
+            <label><input type="checkbox" name="extra_rooms" value="office"> <span>Кабинет</span></label>
+            <label><input type="checkbox" name="extra_rooms" value="sauna"> <span>Сауна в доме</span></label>
+            <label><input type="checkbox" name="extra_rooms" value="laundry"> <span>Постирочная</span></label>
+        </div>
+        <div class="nav-buttons">
+            <button class="btn nav-btn" onclick="showStep(2)">Назад</button>
+            <button class="btn nav-btn" onclick="handleStep3Next()">Далее</button>
+        </div>
+    </div>
+
+    <!-- БЛОК 4: Визуал (ваш код) -->
+    <div id="step-4" class="step">
+        <h2>Выберите стиль дома</h2>
+        <div class="cards-container">
+            <!-- Ваши карточки стилей здесь -->
+            <div class="card" onclick="selectStyle('american')"><img src="american.jpg" alt="Американский"><p>Американский</p></div>
+            <div class="card" onclick="selectStyle('art-deco')"><img src="art-deco.jpg" alt="Ар-Деко"><p>Ар-Деко</p></div>
+            <div class="card" onclick="selectStyle('barnhouse')"><img src="barnhouse.jpg" alt="Барнхаус"><p>Барнхаус</p></div>
+            <div class="card" onclick="selectStyle('classic')"><img src="classic.jpg" alt="Классический"><p>Классический</p></div>
+            <div class="card" onclick="selectStyle('hi-tech')"><img src="hi-tech.jpg" alt="Хай-тек"><p>Хай-тек</p></div>
+            <div class="card" onclick="selectStyle('scandic')"><img src="scandic.jpg" alt="Скандинавский"><p>Скандинавский</p></div>
+            <!-- ... и остальные ваши карточки ... -->
+        </div>
+        <div class="nav-buttons">
+            <button class="btn nav-btn" onclick="showStep(3)">Назад</button>
+            <!-- Кнопка "Далее" здесь не нужна, выбор стиля завершает опрос -->
+        </div>
     </div>
 
     <!-- Логика приложения -->
     <script>
-        let tg = window.Telegram.WebApp; // Инициализация
-        tg.expand(); // Раскрыть на весь экран
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-        let selectedStyle = "";
+        let formData = {};
+        let currentStep = 0;
+        const totalSteps = 5; // 5 шагов (0, 1, 2, 3, 4)
 
-        // Настраиваем Главную Кнопку (внизу экрана)
-        tg.MainButton.textColor = '#FFFFFF';
-        tg.MainButton.color = '#2cab37';
+        document.addEventListener("DOMContentLoaded", function() {
+            showStep(0);
+            setupEventListeners();
+        });
 
-        function selectStyle(style) {
-            selectedStyle = style;
+        function showStep(stepIndex) {
+            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+            document.getElementById(`step-${stepIndex}`).classList.add('active');
+            currentStep = stepIndex;
+            updateProgressBar();
             
-            // Визуально выделяем (логика CSS классов - упрощенно)
+            // Управляем главной кнопкой
+            if (currentStep === totalSteps - 1) { // Если это последний шаг
+                tg.MainButton.setText("Сгенерировать проект");
+                // Кнопка покажется только после выбора стиля
+            } else {
+                tg.MainButton.hide();
+            }
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentStep + 1) / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+        }
+
+        function handleChoice(key, value, nextStep) {
+            formData[key] = value;
+            showStep(nextStep);
+        }
+        
+        // Обработчики для шагов с несколькими вариантами
+        function setupEventListeners() {
+            // Слайдер площади
+            const areaSlider = document.getElementById('area-slider');
+            const areaOutput = document.getElementById('area-output');
+            areaSlider.oninput = function() {
+                areaOutput.innerHTML = `${this.value} м²`;
+            }
+
+            // Группы кнопок с единичным выбором
+            setupButtonGroup('floors-group', 'floors');
+            setupButtonGroup('walls-group', 'wall_material');
+            setupButtonGroup('garage-group', 'garage');
+        }
+
+        function setupButtonGroup(groupId, dataKey) {
+            const group = document.getElementById(groupId);
+            group.addEventListener('click', function(event) {
+                if (event.target.classList.contains('btn')) {
+                    // Снимаем выделение со всех кнопок в группе
+                    group.querySelectorAll('.btn').forEach(btn => btn.classList.remove('selected'));
+                    // Выделяем нажатую
+                    event.target.classList.add('selected');
+                    // Сохраняем данные
+                    formData[dataKey] = event.target.dataset.value;
+                }
+            });
+        }
+        
+        // Функции для кнопок "Далее" с валидацией
+        function handleStep1Next() {
+            formData.residents = document.getElementById('residents-input').value;
+            formData.area = document.getElementById('area-slider').value;
+            if (!formData.floors) {
+                tg.showAlert("Пожалуйста, выберите этажность.");
+                return;
+            }
+            showStep(2);
+        }
+
+        function handleStep2Next() {
+            if (!formData.wall_material) {
+                tg.showAlert("Пожалуйста, выберите материал стен.");
+                return;
+            }
+             if (!formData.garage) {
+                tg.showAlert("Пожалуйста, выберите вариант гаража.");
+                return;
+            }
+            showStep(3);
+        }
+
+        function handleStep3Next() {
+            const extraRooms = [];
+            document.querySelectorAll('input[name="extra_rooms"]:checked').forEach(checkbox => {
+                extraRooms.push(checkbox.value);
+            });
+            formData.extra_rooms = extraRooms;
+            showStep(4);
+        }
+
+        // Выбор стиля (последний шаг)
+        function selectStyle(style) {
+            formData.style = style;
             document.querySelectorAll('.card').forEach(el => el.classList.remove('selected'));
             event.currentTarget.classList.add('selected');
-
-            // Показываем кнопку "Отправить"
-            if (tg.MainButton.isVisible === false) {
-                tg.MainButton.setText("Выбрать стиль");
+            
+            // Теперь, когда все данные собраны, показываем главную кнопку
+            if (!tg.MainButton.isVisible) {
                 tg.MainButton.show();
             }
         }
 
-        // Что происходит при нажатии на Главную Кнопку
-        Telegram.WebApp.onEvent('mainButtonClicked', function(){
-			console.log("Главная кнопка была нажата! Готовлю данные для отправки..."); 
-    
-    	// Безопасно получаем ID пользователя
-    	let userId = null;
-    	if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-        	userId = tg.initDataUnsafe.user.id;
-    	}
-			
-    	// Формируем данные
-    	let data = {
-        	style: selectedStyle,
-			user_id: userId // Используем безопасную переменную
-    	};
+        // Обработчик главной кнопки Телеграма
+        tg.MainButton.onClick(function() {
+            // Проверяем, что все обязательные поля заполнены
+            if (!formData.style) {
+                tg.showAlert("Пожалуйста, выберите стиль дома.");
+                return;
+            }
 
-    	console.log("Отправляю боту данные:", JSON.stringify(data));
-    
-    	// Отправляем данные, только если они не пустые
-    	if (data.style) {
-        	tg.sendData(JSON.stringify(data));
-    	} else {
-        	console.error("Ошибка: Стиль не выбран, данные не отправлены!")
-			
-		// Можно показать пользователю уведомление
-        tg.showAlert("Выберите стиль дома.");
-		}
-		});
+            // Добавляем ID пользователя для идентификации на бэкенде
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                formData.user_id = tg.initDataUnsafe.user.id;
+            }
+            
+            // Отправляем все собранные данные
+            tg.sendData(JSON.stringify(formData));
+        });
+
     </script>
 </body>
 </html>
