@@ -117,15 +117,36 @@
         </div>
     </div>
 
-    <!-- БЛОК 2: Конструктив -->
+    <!-- НОВЫЙ БЛОК 2: Подвал и Рельеф -->
     <div id="step-2" class="step">
+        <h2>Подвал и рельеф участка</h2>
+        <label>Нужен ли подвал / цокольный этаж?</label>
+        <div class="button-group" id="basement-group">
+            <button class="btn" data-value="yes">Да, нужен</button>
+            <button class="btn" data-value="no">Нет, не нужен</button>
+        </div>
+        <br>
+        <label>Рельеф вашего участка?</label>
+        <div class="button-group" id="slope-group">
+            <button class="btn" data-value="flat">Ровный</button>
+            <button class="btn" data-value="slope">Небольшой уклон</button>
+            <button class="btn" data-value="steep_slope">Сильный уклон</button>
+        </div>
+        <div class="nav-buttons">
+            <button class="btn nav-btn" onclick="showStep(1)">Назад</button>
+            <button class="btn nav-btn" onclick="handleStep2Next()">Далее</button>
+        </div>
+    </div>
+
+    <!-- БЛОК 3: Конструктив -->
+    <div id="step-3" class="step">
         <h2>Из чего будем строить?</h2>
         <label>Материал стен:</label>
         <div class="button-group" id="walls-group">
-            <button class="btn" data-value="gas_block">Газобетон / Пеноблок</button>
-            <button class="btn" data-value="brick">Кирпич / Керамический блок</button>
-            <button class="btn" data-value="frame">Каркасная технология</button>
-            <button class="btn" data-value="wood">Клееный брус / Бревно</button>
+            <button class="btn" data-value="gas_block">Газобетон / Пеноблок (тяжелый)</button>
+            <button class="btn" data-value="brick">Кирпич (тяжелый)</button>
+            <button class="btn" data-value="frame">Каркасная технология (легкий)</button>
+            <button class="btn" data-value="wood">Клееный брус (легкий)</button>
         </div>
         <br>
         <label>Гараж:</label>
@@ -135,13 +156,13 @@
             <button class="btn" data-value="integrated">Встроенный в дом</button>
         </div>
         <div class="nav-buttons">
-            <button class="btn nav-btn" onclick="showStep(1)">Назад</button>
-            <button class="btn nav-btn" onclick="handleStep2Next()">Далее</button>
+            <button class="btn nav-btn" onclick="showStep(2)">Назад</button>
+            <button class="btn nav-btn" onclick="handleStep3Next()">Далее</button>
         </div>
     </div>
 
-    <!-- БЛОК 3: Дополнительные помещения -->
-    <div id="step-3" class="step">
+    <!-- БЛОК 4: Дополнительные помещения -->
+    <div id="step-4" class="step">
         <h2>Какие еще помещения нужны?</h2>
         <div class="checkbox-group">
             <label><input type="checkbox" name="extra_rooms" value="master_bedroom"> <span>Мастер-спальня (со своим с/у)</span></label>
@@ -150,27 +171,24 @@
             <label><input type="checkbox" name="extra_rooms" value="laundry"> <span>Постирочная</span></label>
         </div>
         <div class="nav-buttons">
-            <button class="btn nav-btn" onclick="showStep(2)">Назад</button>
-            <button class="btn nav-btn" onclick="handleStep3Next()">Далее</button>
+            <button class="btn nav-btn" onclick="showStep(3)">Назад</button>
+            <button class="btn nav-btn" onclick="handleStep4Next()">Далее</button>
         </div>
     </div>
-
-    <!-- БЛОК 4: Визуал (ваш код) -->
-    <div id="step-4" class="step">
+    
+    <!-- БЛОК 5: Визуал (ваш код) -->
+    <div id="step-5" class="step">
         <h2>Выберите стиль дома</h2>
         <div class="cards-container">
             <!-- Ваши карточки стилей здесь -->
             <div class="card" onclick="selectStyle('american')"><img src="american.jpg" alt="Американский"><p>Американский</p></div>
-            <div class="card" onclick="selectStyle('art-deco')"><img src="art-deco.jpg" alt="Ар-Деко"><p>Ар-Деко</p></div>
             <div class="card" onclick="selectStyle('barnhouse')"><img src="barnhouse.jpg" alt="Барнхаус"><p>Барнхаус</p></div>
             <div class="card" onclick="selectStyle('classic')"><img src="classic.jpg" alt="Классический"><p>Классический</p></div>
             <div class="card" onclick="selectStyle('hi-tech')"><img src="hi-tech.jpg" alt="Хай-тек"><p>Хай-тек</p></div>
-            <div class="card" onclick="selectStyle('scandic')"><img src="scandic.jpg" alt="Скандинавский"><p>Скандинавский</p></div>
-            <!-- ... и остальные ваши карточки ... -->
+            <!-- ... и остальные ... -->
         </div>
         <div class="nav-buttons">
-            <button class="btn nav-btn" onclick="showStep(3)">Назад</button>
-            <!-- Кнопка "Далее" здесь не нужна, выбор стиля завершает опрос -->
+            <button class="btn nav-btn" onclick="showStep(4)">Назад</button>
         </div>
     </div>
 
@@ -181,7 +199,7 @@
 
         let formData = {};
         let currentStep = 0;
-        const totalSteps = 5; // 5 шагов (0, 1, 2, 3, 4)
+        const totalSteps = 6; // Теперь 6 шагов
 
         document.addEventListener("DOMContentLoaded", function() {
             showStep(0);
@@ -194,10 +212,9 @@
             currentStep = stepIndex;
             updateProgressBar();
             
-            // Управляем главной кнопкой
-            if (currentStep === totalSteps - 1) { // Если это последний шаг
+            if (currentStep === totalSteps - 1) {
                 tg.MainButton.setText("Сгенерировать проект");
-                // Кнопка покажется только после выбора стиля
+                if (formData.style) tg.MainButton.show();
             } else {
                 tg.MainButton.hide();
             }
@@ -213,17 +230,14 @@
             showStep(nextStep);
         }
         
-        // Обработчики для шагов с несколькими вариантами
         function setupEventListeners() {
-            // Слайдер площади
             const areaSlider = document.getElementById('area-slider');
             const areaOutput = document.getElementById('area-output');
-            areaSlider.oninput = function() {
-                areaOutput.innerHTML = `${this.value} м²`;
-            }
+            areaSlider.oninput = function() { areaOutput.innerHTML = `${this.value} м²`; }
 
-            // Группы кнопок с единичным выбором
             setupButtonGroup('floors-group', 'floors');
+            setupButtonGroup('basement-group', 'basement');
+            setupButtonGroup('slope-group', 'slope');
             setupButtonGroup('walls-group', 'wall_material');
             setupButtonGroup('garage-group', 'garage');
         }
@@ -232,77 +246,52 @@
             const group = document.getElementById(groupId);
             group.addEventListener('click', function(event) {
                 if (event.target.classList.contains('btn')) {
-                    // Снимаем выделение со всех кнопок в группе
                     group.querySelectorAll('.btn').forEach(btn => btn.classList.remove('selected'));
-                    // Выделяем нажатую
                     event.target.classList.add('selected');
-                    // Сохраняем данные
                     formData[dataKey] = event.target.dataset.value;
                 }
             });
         }
         
-        // Функции для кнопок "Далее" с валидацией
+        // Обновленные функции навигации
         function handleStep1Next() {
             formData.residents = document.getElementById('residents-input').value;
             formData.area = document.getElementById('area-slider').value;
-            if (!formData.floors) {
-                tg.showAlert("Пожалуйста, выберите этажность.");
-                return;
-            }
+            if (!formData.floors) { tg.showAlert("Пожалуйста, выберите этажность."); return; }
             showStep(2);
         }
 
         function handleStep2Next() {
-            if (!formData.wall_material) {
-                tg.showAlert("Пожалуйста, выберите материал стен.");
-                return;
-            }
-             if (!formData.garage) {
-                tg.showAlert("Пожалуйста, выберите вариант гаража.");
-                return;
-            }
+            if (!formData.basement) { tg.showAlert("Укажите, нужен ли подвал."); return; }
+            if (!formData.slope) { tg.showAlert("Укажите рельеф участка."); return; }
             showStep(3);
         }
-
+        
         function handleStep3Next() {
-            const extraRooms = [];
-            document.querySelectorAll('input[name="extra_rooms"]:checked').forEach(checkbox => {
-                extraRooms.push(checkbox.value);
-            });
-            formData.extra_rooms = extraRooms;
+            if (!formData.wall_material) { tg.showAlert("Пожалуйста, выберите материал стен."); return; }
+            if (!formData.garage) { tg.showAlert("Пожалуйста, выберите вариант гаража."); return; }
             showStep(4);
         }
 
-        // Выбор стиля (последний шаг)
+        function handleStep4Next() {
+            const extraRooms = [];
+            document.querySelectorAll('input[name="extra_rooms"]:checked').forEach(c => extraRooms.push(c.value));
+            formData.extra_rooms = extraRooms;
+            showStep(5);
+        }
+
         function selectStyle(style) {
             formData.style = style;
             document.querySelectorAll('.card').forEach(el => el.classList.remove('selected'));
             event.currentTarget.classList.add('selected');
-            
-            // Теперь, когда все данные собраны, показываем главную кнопку
-            if (!tg.MainButton.isVisible) {
-                tg.MainButton.show();
-            }
+            if (!tg.MainButton.isVisible) tg.MainButton.show();
         }
 
-        // Обработчик главной кнопки Телеграма
         tg.MainButton.onClick(function() {
-            // Проверяем, что все обязательные поля заполнены
-            if (!formData.style) {
-                tg.showAlert("Пожалуйста, выберите стиль дома.");
-                return;
-            }
-
-            // Добавляем ID пользователя для идентификации на бэкенде
-            if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                formData.user_id = tg.initDataUnsafe.user.id;
-            }
-            
-            // Отправляем все собранные данные
+            if (!formData.style) { tg.showAlert("Пожалуйста, выберите стиль дома."); return; }
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user) { formData.user_id = tg.initDataUnsafe.user.id; }
             tg.sendData(JSON.stringify(formData));
         });
-
     </script>
 </body>
 </html>
