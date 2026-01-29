@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Конструктор Дома</title>
-    <!-- ГЛАВНОЕ: Скрипт Телеграма -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Стили -->
     <style>
         :root {
-            --tg-theme-bg-color: #ffffff; /* Значения по умолчанию, если переменные ТГ не загрузятся */
+            --tg-theme-bg-color: #ffffff;
             --tg-theme-text-color: #000000;
             --tg-theme-button-color: #34b7f1;
             --tg-theme-secondary-bg-color: #f0f0f0;
@@ -23,7 +21,9 @@
             -webkit-font-smoothing: antialiased;
         }
         .step { display: none; }
-        .step.active { display: block; }
+        .step.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
         h2 { text-align: center; margin-bottom: 20px; font-size: 1.2em; }
         .button-group { display: flex; flex-direction: column; gap: 10px; }
         .btn {
@@ -42,42 +42,35 @@
         .btn.selected { background-color: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color, #ffffff); }
         .nav-buttons { display: flex; justify-content: space-between; margin-top: 30px; }
         .nav-btn { width: 48%; }
+        
         .progress-bar-container { width: 100%; background-color: var(--tg-theme-secondary-bg-color); border-radius: 5px; overflow: hidden; margin-bottom: 20px; }
         .progress-bar { height: 8px; width: 0%; background-color: var(--tg-theme-button-color); transition: width 0.3s ease; }
         
-        /* Стили для карточек выбора архитектурного стиля дома */
         .cards-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .card { border: 2px solid transparent; padding: 10px; border-radius: 12px; text-align: center; background-color: var(--tg-theme-secondary-bg-color); }
-        .card img { width: 100%;/* height: 80px;*/ object-fit: cover; border-radius: 8px; }
+        .card { border: 2px solid transparent; padding: 10px; border-radius: 12px; text-align: center; background-color: var(--tg-theme-secondary-bg-color); cursor: pointer; }
+        .card img { width: 100%; object-fit: cover; border-radius: 8px; }
         .card p { margin: 5px 0 0; font-size: 0.8em; }
-        .card.selected { border-color: var(--tg-theme-button-color); }
+        .card.selected { border-color: var(--tg-theme-button-color); background-color: rgba(52, 183, 241, 0.1); }
 
-        /* Стили для инпутов и слайдеров */
         input[type="number"], input[type="text"] {
-            width: 100%;
-            padding: 15px;
-            box-sizing: border-box;
+            width: 100%; padding: 15px; box-sizing: border-box;
             border: 1px solid var(--tg-theme-secondary-bg-color);
-            background-color: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
-            border-radius: 8px;
-            font-size: 1em;
-            text-align: center;
+            background-color: var(--tg-theme-bg-color); color: var(--tg-theme-text-color);
+            border-radius: 8px; font-size: 1em; text-align: center;
         }
         input[type="range"] { width: 100%; }
         #area-output { font-weight: bold; text-align: center; margin-top: 10px; }
 
-        /* Стили для кастомных чекбоксов */
         .checkbox-group label {
-            display: block;
-            background-color: var(--tg-theme-secondary-bg-color);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
+            display: block; background-color: var(--tg-theme-secondary-bg-color);
+            padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer;
         }
         .checkbox-group input { display: none; }
-        .checkbox-group input:checked + span { font-weight: bold; }
+        .checkbox-group input:checked + span { font-weight: bold; color: var(--tg-theme-button-color); }
         .checkbox-group input:checked + span::before { content: '✅ '; }
+
+        /* Стиль для подсказки */
+        #style-hint { text-align: center; color: var(--tg-theme-hint-color, #888); font-size: 0.9em; margin-bottom: 15px; font-style: italic;}
     </style>
 </head>
 <body>
@@ -117,7 +110,7 @@
         </div>
     </div>
 
-    <!-- НОВЫЙ БЛОК 2: Подвал и Рельеф -->
+    <!-- БЛОК 2: Подвал и Рельеф -->
     <div id="step-2" class="step">
         <h2>Подвал и рельеф участка</h2>
         <label>Нужен ли подвал / цокольный этаж?</label>
@@ -143,10 +136,10 @@
         <h2>Из чего будем строить?</h2>
         <label>Материал стен:</label>
         <div class="button-group" id="walls-group">
-            <button class="btn" data-value="gas_block">Газобетон / Пеноблок (тяжелый)</button>
-            <button class="btn" data-value="brick">Кирпич (тяжелый)</button>
-            <button class="btn" data-value="frame">Каркасная технология (легкий)</button>
-            <button class="btn" data-value="wood">Клееный брус (легкий)</button>
+            <button class="btn" data-value="gas_block">Газобетон / Пеноблок</button>
+            <button class="btn" data-value="brick">Кирпич</button>
+            <button class="btn" data-value="frame">Каркасная технология</button>
+            <button class="btn" data-value="wood">Клееный брус</button>
         </div>
         <br>
         <label>Гараж:</label>
@@ -176,31 +169,36 @@
         </div>
     </div>
     
-    <!-- БЛОК 5: Визуал (ваш код) -->
+    <!-- БЛОК 5: Визуал (С ФИЛЬТРАЦИЕЙ) -->
     <div id="step-5" class="step">
         <h2>Выберите стиль дома</h2>
+        <p id="style-hint">Доступные стили:</p>
         <div class="cards-container">
-            <!-- Карточки архитеркурных стилей домов -->
-            <div class="card" onclick="selectStyle('american')"><img src="american.jpg" alt="Американский"><p>Американский</p></div>
-		    <div class="card" onclick="selectStyle('art-deco')"><img src="art-deco.jpg" alt="Ар-Деко"><p>Ар-Деко</p></div>
-		    <div class="card" onclick="selectStyle('barnhouse')"><img src="barnhouse.jpg" alt="Барнхаус"><p>Барнхаус</p></div>
-		    <div class="card" onclick="selectStyle('baroque')"><img src="baroque.jpg" alt="Барокко"><p>Барокко</p></div>
-		    <div class="card" onclick="selectStyle('chalet')"><img src="chalet.jpg" alt="Шале"><p>Шале</p></div>
-		    <div class="card" onclick="selectStyle('classic')"><img src="classic.jpg" alt="Классический"><p>Классический</p></div>
-		    <div class="card" onclick="selectStyle('colonial')"><img src="colonial.jpg" alt="Колониальный"><p>Колониальный</p></div>
-		    <div class="card" onclick="selectStyle('country')"><img src="country.jpg" alt="Кантри"><p>Кантри</p></div>
-		    <div class="card" onclick="selectStyle('english')"><img src="english.jpg" alt="Английский"><p>Английский</p></div>
-		    <div class="card" onclick="selectStyle('european')"><img src="european.jpg" alt="Европейский"><p>Европейский</p></div>
-		    <div class="card" onclick="selectStyle('ghotic')"><img src="ghotic.jpg" alt="Готический"><p>Готический</p></div>
-		    <div class="card" onclick="selectStyle('half-timbered')"><img src="half-timbered.jpg" alt="Фахверк"><p>Фахверк</p></div>
-		    <div class="card" onclick="selectStyle('hi-tech')"><img src="hi-tech.jpg" alt="Хай-тек"><p>Хай-тек</p></div>
-		    <div class="card" onclick="selectStyle('mediterranean')"><img src="mediterranean.jpg" alt="Средиземноморский"><p>Средиземноморский</p></div>
-		    <div class="card" onclick="selectStyle('minimal')"><img src="minimal.jpg" alt="Минимализм"><p>Минимализм</p></div>
-		    <div class="card" onclick="selectStyle('oriental')"><img src="oriental.jpg" alt="Восточный"><p>Восточный</p></div>
-		    <div class="card" onclick="selectStyle('provance')"><img src="provance.jpg" alt="Прованс"><p>Прованс</p></div>
-		    <div class="card" onclick="selectStyle('renaissance')"><img src="renaissance.jpg" alt="Ренессанс"><p>Ренессанс</p></div>
-		    <div class="card" onclick="selectStyle('russian')"><img src="russian.jpg" alt="Русский"><p>Русский</p></div>
-		    <div class="card" onclick="selectStyle('scandic')"><img src="scandic.jpg" alt="Скандинавский"><p>Скандинавский</p></div>
+            <!-- 
+               data-types="all"   -> Подходит всем
+               data-types="heavy" -> Кирпич, Газобетон
+               data-types="light" -> Каркас, Брус
+            -->
+            <div class="card" data-types="all" onclick="selectStyle('american')"><img src="american.jpg" alt="Американский"><p>Американский</p></div>
+            <div class="card" data-types="heavy" onclick="selectStyle('art-deco')"><img src="art-deco.jpg" alt="Ар-Деко"><p>Ар-Деко</p></div>
+            <div class="card" data-types="light" onclick="selectStyle('barnhouse')"><img src="barnhouse.jpg" alt="Барнхаус"><p>Барнхаус</p></div>
+            <div class="card" data-types="heavy" onclick="selectStyle('baroque')"><img src="baroque.jpg" alt="Барокко"><p>Барокко</p></div>
+            <div class="card" data-types="light" onclick="selectStyle('chalet')"><img src="chalet.jpg" alt="Шале"><p>Шале</p></div>
+            <div class="card" data-types="heavy" onclick="selectStyle('classic')"><img src="classic.jpg" alt="Классический"><p>Классический</p></div>
+            <div class="card" data-types="heavy" onclick="selectStyle('colonial')"><img src="colonial.jpg" alt="Колониальный"><p>Колониальный</p></div>
+            <div class="card" data-types="light" onclick="selectStyle('country')"><img src="country.jpg" alt="Кантри"><p>Кантри</p></div>
+            <div class="card" data-types="heavy" onclick="selectStyle('english')"><img src="english.jpg" alt="Английский"><p>Английский</p></div>
+            <div class="card" data-types="heavy" onclick="selectStyle('european')"><img src="european.jpg" alt="Европейский"><p>Европейский</p></div>
+            <div class="card" data-types="heavy" onclick="selectStyle('ghotic')"><img src="ghotic.jpg" alt="Готический"><p>Готический</p></div>
+            <div class="card" data-types="light" onclick="selectStyle('half-timbered')"><img src="half-timbered.jpg" alt="Фахверк"><p>Фахверк</p></div>
+            <div class="card" data-types="all" onclick="selectStyle('hi-tech')"><img src="hi-tech.jpg" alt="Хай-тек"><p>Хай-тек</p></div>
+            <div class="card" data-types="heavy" onclick="selectStyle('mediterranean')"><img src="mediterranean.jpg" alt="Средиземноморский"><p>Средиземноморский</p></div>
+            <div class="card" data-types="all" onclick="selectStyle('minimal')"><img src="minimal.jpg" alt="Минимализм"><p>Минимализм</p></div>
+            <div class="card" data-types="all" onclick="selectStyle('oriental')"><img src="oriental.jpg" alt="Восточный"><p>Восточный</p></div>
+            <div class="card" data-types="all" onclick="selectStyle('provance')"><img src="provance.jpg" alt="Прованс"><p>Прованс</p></div>
+            <div class="card" data-types="heavy" onclick="selectStyle('renaissance')"><img src="renaissance.jpg" alt="Ренессанс"><p>Ренессанс</p></div>
+            <div class="card" data-types="light" onclick="selectStyle('russian')"><img src="russian.jpg" alt="Русский"><p>Русский</p></div>
+            <div class="card" data-types="light" onclick="selectStyle('scandic')"><img src="scandic.jpg" alt="Скандинавский"><p>Скандинавский</p></div>
         </div>
         <div class="nav-buttons">
             <button class="btn nav-btn" onclick="showStep(4)">Назад</button>
@@ -214,11 +212,18 @@
 
         let formData = {};
         let currentStep = 0;
-        const totalSteps = 6; // Теперь 6 шагов
+        const totalSteps = 6;
 
         document.addEventListener("DOMContentLoaded", function() {
             showStep(0);
             setupEventListeners();
+            
+            // Настройка цвета главной кнопки под стиль Телеграм
+            tg.MainButton.setParams({
+                text: "Сгенерировать проект",
+                color: "#2481cc",
+                text_color: "#ffffff"
+            });
         });
 
         function showStep(stepIndex) {
@@ -228,7 +233,6 @@
             updateProgressBar();
             
             if (currentStep === totalSteps - 1) {
-                tg.MainButton.setText("Сгенерировать проект");
                 if (formData.style) tg.MainButton.show();
             } else {
                 tg.MainButton.hide();
@@ -268,7 +272,6 @@
             });
         }
         
-        // Обновленные функции навигации
         function handleStep1Next() {
             formData.residents = document.getElementById('residents-input').value;
             formData.area = document.getElementById('area-slider').value;
@@ -288,12 +291,60 @@
             showStep(4);
         }
 
+        // --- ГЛАВНОЕ ИЗМЕНЕНИЕ ЗДЕСЬ ---
         function handleStep4Next() {
             const extraRooms = [];
             document.querySelectorAll('input[name="extra_rooms"]:checked').forEach(c => extraRooms.push(c.value));
             formData.extra_rooms = extraRooms;
+            
+            // Вызываем фильтрацию перед показом стилей
+            filterStylesByMaterial();
+            
             showStep(5);
         }
+        
+        // Функция фильтрации стилей
+        function filterStylesByMaterial() {
+            const wallMaterial = formData.wall_material;
+            let constructionType = 'all';
+
+            // Определяем тип конструкции: heavy или light
+            if (['brick', 'gas_block'].includes(wallMaterial)) {
+                constructionType = 'heavy';
+            } else if (['frame', 'wood'].includes(wallMaterial)) {
+                constructionType = 'light';
+            }
+
+            // Показываем подсказку
+            const hintElement = document.getElementById('style-hint');
+            if (constructionType === 'heavy') {
+                hintElement.innerText = "✨ Рекомендуемые стили для каменных домов:";
+            } else if (constructionType === 'light') {
+                hintElement.innerText = "🌲 Рекомендуемые стили для деревянных и каркасных домов:";
+            } else {
+                hintElement.innerText = "Выберите стиль дома:";
+            }
+
+            // Фильтруем карточки
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const allowedTypes = card.getAttribute('data-types');
+                
+                // Если тип совпадает или карточка универсальна ("all")
+                if (allowedTypes === 'all' || allowedTypes === constructionType) {
+                    card.style.display = 'block'; // Показываем
+                } else {
+                    card.style.display = 'none';  // Скрываем
+                    // Если скрыли карточку, которая была выбрана - сбрасываем выбор
+                    if (card.classList.contains('selected')) {
+                        card.classList.remove('selected');
+                        formData.style = null;
+                        tg.MainButton.hide();
+                    }
+                }
+            });
+        }
+        // ------------------------------
 
         function selectStyle(style) {
             formData.style = style;
@@ -310,5 +361,3 @@
     </script>
 </body>
 </html>
-
-
