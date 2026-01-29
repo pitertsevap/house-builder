@@ -291,7 +291,6 @@
             showStep(4);
         }
 
-        // --- ГЛАВНОЕ ИЗМЕНЕНИЕ ЗДЕСЬ ---
         function handleStep4Next() {
             const extraRooms = [];
             document.querySelectorAll('input[name="extra_rooms"]:checked').forEach(c => extraRooms.push(c.value));
@@ -344,7 +343,6 @@
                 }
             });
         }
-        // ------------------------------
 
         function selectStyle(style) {
             formData.style = style;
@@ -361,3 +359,4 @@
     </script>
 </body>
 </html>
+
